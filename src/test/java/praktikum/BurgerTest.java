@@ -1,18 +1,16 @@
 package praktikum;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.mockito.Mockito;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.Assert.*;
 
 public class BurgerTest {
 
     @Test
-    void testConstructor() {
+    public void testConstructor() {
         Burger burger = new Burger();
         assertNull(burger.bun);
-        assertNotNull(burger.ingredients);
+        assertEquals(0, burger.ingredients.size());
 
         Bun bun = new Bun("foo", 10.0f);
         burger.setBuns(bun);
@@ -20,12 +18,10 @@ public class BurgerTest {
     }
 
     @Test
-    void testAddIngredient() {
+    public void testAddIngredient() {
         Burger burger = new Burger();
         Bun bun = new Bun("foo", 10.0f);
         burger.setBuns(bun);
-
-        assertEquals(0, burger.ingredients.size());
 
         Ingredient filling = new Ingredient(IngredientType.FILLING, "foo", 10.0f);
         burger.addIngredient(filling);
@@ -41,16 +37,23 @@ public class BurgerTest {
     }
 
     @Test
-    void testRemoveIngredient() {
+    public void testRemoveIngredient_shouldThrowWhenNoIngredients() {
         Burger burger = new Burger();
         Bun bun = new Bun("foo", 10.0f);
         burger.setBuns(bun);
 
         assertThrows(
+                "burger.removeIngredient on empty burger",
                 IndexOutOfBoundsException.class,
-                () -> burger.removeIngredient(0),
-                "burger.removeIngredient on empty burger"
+                () -> burger.removeIngredient(0)
         );
+    }
+
+    @Test
+    public void testRemoveIngredient() {
+        Burger burger = new Burger();
+        Bun bun = new Bun("foo", 10.0f);
+        burger.setBuns(bun);
 
         Ingredient filling = new Ingredient(IngredientType.FILLING, "foo", 10.0f);
         burger.addIngredient(filling);
@@ -60,16 +63,23 @@ public class BurgerTest {
     }
 
     @Test
-    void testMoveIngredient() {
+    public void testMoveIngredient_shouldThrowWhenNoIngredients() {
         Burger burger = new Burger();
         Bun bun = new Bun("foo", 10.0f);
         burger.setBuns(bun);
 
         assertThrows(
+                "burger.moveIngredient on empty burger",
                 IndexOutOfBoundsException.class,
-                () -> burger.moveIngredient(0, 1),
-                "burger.moveIngredient on empty burger"
+                () -> burger.moveIngredient(0, 1)
         );
+    }
+
+    @Test
+    public void testMoveIngredient() {
+        Burger burger = new Burger();
+        Bun bun = new Bun("foo", 10.0f);
+        burger.setBuns(bun);
 
         Ingredient filling = new Ingredient(IngredientType.FILLING, "foo", 10.0f);
         burger.addIngredient(filling);
@@ -86,40 +96,63 @@ public class BurgerTest {
     }
 
     @Test
-    void testGetPrice() {
+    public void testGetPrice_shouldThrowWhenNoBunSet() {
         Burger burger = new Burger();
 
         assertThrows(
+                "burger.getPrice on empty burger",
                 NullPointerException.class,
-                burger::getPrice,
-                "burger.getPrice on empty burger"
+                burger::getPrice
         );
+    }
+
+    @Test
+    public void testGetPrice() {
+        Burger burger = new Burger();
 
         Bun bun = new Bun("foo", 10.0f);
         burger.setBuns(bun);
 
-        assertEquals(bun.getPrice() * 2, burger.getPrice());
-
-        Ingredient filling = new Ingredient(IngredientType.FILLING, "foo", 10.0f);
-        burger.addIngredient(filling);
-        assertEquals(bun.getPrice() * 2 + filling.getPrice(), burger.getPrice());
-
-        Ingredient sauce = new Ingredient(IngredientType.SAUCE, "bar", 3.0f);
-        burger.addIngredient(sauce);
-        assertEquals(bun.getPrice() * 2 + filling.getPrice() + sauce.getPrice(), burger.getPrice());
+        assertEquals(bun.getPrice() * 2, burger.getPrice(), 0.001f);
     }
 
     @Test
-    void testGetReceipt() {
+    public void testGetPriceFilling() {
+        Burger burger = new Burger();
+        Bun bun = new Bun("foo", 10.0f);
+        burger.setBuns(bun);
+
+        Ingredient filling = new Ingredient(IngredientType.FILLING, "foo", 10.0f);
+        burger.addIngredient(filling);
+        assertEquals(bun.getPrice() * 2 + filling.getPrice(), burger.getPrice(), 0.001f);
+    }
+
+    @Test
+    public void testGetPriceSauce() {
+        Burger burger = new Burger();
+        Bun bun = new Bun("foo", 10.0f);
+        burger.setBuns(bun);
+
+        Ingredient sauce = new Ingredient(IngredientType.SAUCE, "bar", 3.0f);
+        burger.addIngredient(sauce);
+        assertEquals(bun.getPrice() * 2 + sauce.getPrice(), burger.getPrice(), 0.001f);
+    }
+
+    @Test
+    public void testGetReceipt_shouldThrowWhenNoBunSet() {
+        // MOCK
         Burger burger = Mockito.spy(new Burger());
 
         assertThrows(
+                "burger.getReceipt on empty burger",
                 NullPointerException.class,
-                burger::getReceipt,
-                "burger.getReceipt on empty burger"
+                burger::getReceipt
         );
-        Mockito.verify(burger, Mockito.times(1)).getReceipt();
+    }
 
+    @Test
+    public void testGetReceipt() {
+        Burger burger = Mockito.spy(new Burger());
         Bun bun = Mockito.spy(new Bun("foo", 10.0f));
         Mockito.when(bun.getName()).thenReturn("bar");
         burger.setBuns(bun);
@@ -155,5 +188,6 @@ public class BurgerTest {
 
         Mockito.verify(sauce, Mockito.times(1)).getType();
         Mockito.verify(sauce, Mockito.times(1)).getName();
+        Mockito.verify(bun, Mockito.times(6)).getName();
     }
 }
